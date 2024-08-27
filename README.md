@@ -1,5 +1,3 @@
-
-
 # data2db
 
 `data2db` is a powerful utility designed to simplify the process of uploading data from Excel files directly into your SQL Server or PostgreSQL database. With minimal setup, you can map Excel columns to database fields and insert the data efficiently. This tool is ideal for developers and data professionals who need a straightforward solution for data migration or regular data imports.
@@ -26,7 +24,7 @@ npm i data2db
 Here’s how to use `data2db` to upload data from an Excel file into your database:
 
 ```typescript
-import { data2db } from 'excel-to-db';
+import { ExcelToDB } from "./index";
 
 async function main() {
   // Database configuration
@@ -36,7 +34,6 @@ async function main() {
       host: "",
       user: "",
       password: "",
-      database: "postgres",
       port: 5432,
     },
   };
@@ -44,13 +41,13 @@ async function main() {
   // Mapping between Excel columns and database fields
   const mapping = ["id", "name", "phone", "email"];
 
-  // Create an instance of data2db with the database configuration
-  const data2db = new data2db(dbConfig);
+  // Create an instance of ExcelToDB with the database configuration
+  const excelToDB = new ExcelToDB(dbConfig);
 
   try {
     // Upload the Excel data to the database
     console.log("Start file processing ");
-    await data2db.uploadExcel("./path/to/your/excel.xlsx", "TableName", mapping);
+    await excelToDB.uploadExcel("./.vscode/Book1.xlsx", "Employee", mapping);
     console.log("Upload complete");
   } catch (error) {
     console.error("Error:", error);
@@ -103,9 +100,4 @@ Contributions are welcome! Feel free to open issues or submit pull requests on t
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
-
-### Notes:
-- Replace `"data2db"` with the actual package name when you publish to npm.
-- Update the GitHub repository link with the actual URL of your project's repository.
-
-This README provides a clear and detailed guide for users to understand how to install, configure, and use your `data2db` utility.
+ 
