@@ -9,47 +9,49 @@ export class ExcelToDB {
     this.db = DatabaseFactory.createDatabase(dbConfig);
   }
 
-  public async uploadExcel(
+  public async uploadExcelFile(
     filePath: string,
-    table: string,
-    mapping: string[] = []
+    tableName: string,
+    selectedColumns: string[] = []
   ): Promise<void> {
     try {
-      const data: string[] = [];
-      const keys: string[] = [];
-      const mappingWasProvided = mapping.length > 0;
-      let isHeaderProcessed = false;
+      const rowsToInsert: string[] = [];
+      const columnNames: string[] = [];
+      const isColumnMappingProvided = selectedColumns.length > 0;
+      let hasProcessedHeader = false;
 
       await this.db.connect();
 
       const workbook: xlsx.WorkBook = xlsx.readFile(filePath);
-      const sheetName: string = workbook.SheetNames[0];
-      const sheet: xlsx.WorkSheet = workbook.Sheets[sheetName];
-      const rows: Record<string, string>[] = xlsx.utils.sheet_to_json(sheet, {
-        raw: true,
-      });
+      const firstSheetName: string = workbook.SheetNames[0];
+      const worksheet: xlsx.WorkSheet = workbook.Sheets[firstSheetName];
+      const sheetData: Record<string, string>[] = xlsx.utils.sheet_to_json(
+        worksheet,
+        { raw: true }
+      );
 
-      rows.forEach((row) => {
-        const entries = Object.entries(row);
-        const rowData: string[] = [];
+      sheetData.forEach((row) => {
+        const rowEntries = Object.entries(row);
+        const rowValues: string[] = [];
 
-        entries.forEach(([key, value]) => {
-          if (mappingWasProvided && !mapping.includes(key)) return;
-          if (!isHeaderProcessed) keys.push(key);
-          rowData.push(`'${value}'`);
+        rowEntries.forEach(([columnName, cellValue]) => {
+          if (isColumnMappingProvided && !selectedColumns.includes(columnName))
+            return;
+          if (!hasProcessedHeader) columnNames.push(columnName);
+          rowValues.push(`'${cellValue}'`);
         });
 
-        if (rowData.length > 0) {
-          data.push(`(${rowData.join(", ")})`);
+        if (rowValues.length > 0) {
+          rowsToInsert.push(`(${rowValues.join(", ")})`);
         }
 
-        isHeaderProcessed = true;
+        hasProcessedHeader = true;
       });
 
-      const queryData = data.join(", ");
-      const queryKeys = keys.join(", ");
+      const formattedData = rowsToInsert.join(", ");
+      const formattedColumnNames = columnNames.join(", ");
 
-      await this.db.insertData(table, queryData, queryKeys);
+      await this.db.insertData(tableName, formattedData, formattedColumnNames);
     } catch (error) {
       throw error;
     } finally {
