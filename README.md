@@ -16,7 +16,7 @@
 To install `data2db`, use npm:
 
 ```bash
-npm install excel-to-db
+npm i data2db
 ```
 
 ## Usage
